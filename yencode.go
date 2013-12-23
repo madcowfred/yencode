@@ -2,7 +2,6 @@ package yencode
 
 import (
     "io"
-    // "io/ioutil"
 )
 
 // hard code line length to be evil
@@ -17,19 +16,19 @@ type encoder struct {
 
 // make a static lookup array
 // NOTE: it's actually consistently faster to not use this in my tests at least
-//       "CPU: AMD Athlon(tm) II X2 240e Processor (2812.59-MHz K8-class CPU)"
-//
-var yEncTable = makeTable()
+//       "AMD Athlon(tm) II X2 240e Processor (2812.59-MHz K8-class CPU)" = ~2% slower
+//       "Intel(R) Core(TM) i5-3570K CPU @ 3.40GHz" = ~10% slower
+// var yEncTable = makeTable()
 
-func makeTable() [256]byte {
-    var t [256]byte
-    for i := 0; i < 256; i++ {
-        t[i] = byte((i + 42) & 255)
-    }
-    return t
-}
+// func makeTable() [256]byte {
+//     var t [256]byte
+//     for i := 0; i < 256; i++ {
+//         t[i] = byte((i + 42) & 255)
+//     }
+//     return t
+// }
 
-func (e *encoder) encode() error {
+func (e *encoder) encode() {
     // misc vars
     var y byte
     count := 0
@@ -69,7 +68,6 @@ func (e *encoder) encode() error {
 
     // dangling count = write CRLF etc
     if count > 0 {
-        // add the CRLF pair
         line[count] = 0x0D
         line[count+1] = 0x0A
         count += 2
@@ -77,11 +75,9 @@ func (e *encoder) encode() error {
         // write the line to the output file
         e.output.Write(line[:count])
     }
-
-    return nil
 }
 
-func Encode(input []byte, output io.Writer) error {
+func Encode(input []byte, output io.Writer) {
     e := &encoder{ input: input, output: output }
-    return e.encode()
+    e.encode()
 }
